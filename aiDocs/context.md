@@ -6,25 +6,7 @@
 ## Key Documents
 - **PRD:** `aiDocs/prd.md` - Full product requirements and feature specifications
 - **MVP:** `aiDocs/mvp.md` - Web-based interactive demo specification (2-week timeline)
-
-## Tech Stack
-
-### MVP (Web Demo)
-- **Frontend:** React + TypeScript + Vite
-- **Styling:** TailwindCSS
-- **UI Components:** Shadcn/ui or Radix UI
-- **Animations:** Framer Motion
-- **Charts:** Recharts or Chart.js
-- **State:** Zustand or React Context
-- **Storage:** LocalStorage
-- **Hosting:** Vercel or Netlify
-- **Analytics:** Plausible (privacy-first)
-
-### Future (Mobile App)
-- **Platform:** React Native with Expo
-- **Backend:** Firebase (optional cloud backup)
-- **Step Tracking:** HealthKit (iOS) / Google Fit (Android)
-- **Notifications:** React Native Push Notifications
+- **Architecture:** `aiDocs/architecture.md` - Technical architecture and implementation details
 
 ## Core Features
 
