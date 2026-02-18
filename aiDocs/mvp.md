@@ -191,6 +191,27 @@ Interactive Demo Experience
 - C) "A competitive rival who pushes me to go further" → Challenger (3pts)
 - D) "A wise mentor who makes walks feel meditative" → Sage (3pts)
 
+**Q8: The "Busy Day" Friction**
+"You have a packed schedule and only 15 minutes to spare. How do you justify a short walk?"
+- A) "Even a short burst of movement improves cognitive function and blood flow." → Educator (3pts)
+- B) "I promised myself I’d do something today, and I don't want to let myself down." → Companion (2pts), Sage (1pt)
+- C) "15 minutes is better than 0. Don't let the day win—get out there!" → Challenger (3pts)
+- D) "Use this time to breathe and reset your nervous system." → Sage (3pts)
+
+**Q9: The Reward System**
+"What kind of 'reward' for hitting a milestone actually feels valuable to you?"
+- A) "A digital trophy or a shoutout on a leaderboard." → Challenger (2pts), Cheerleader (1pt)
+- B) "A summary report showing exactly how much my fitness has improved." → Educator (3pts)
+- C) "A heartfelt 'I'm so impressed by your dedication' message." → Companion (2pts), Cheerleader (1pt)
+- D) "The quiet satisfaction of knowing I’m becoming a more disciplined person." → Sage (2pts), Pessimist (1pt)
+
+**Q10: External Resistance**  
+"It’s raining outside and you really don’t want to go. What’s the one thing that gets you out the door?"
+- A) "The rain won't melt you. Stop making excuses and go." → Pessimist (3pts), Challenger (1pt)
+- B) "Think of how cozy and accomplished you'll feel when you get back inside!" → Cheerleader (2pts), Companion (1pt)
+- C) "Walking in nature—even in the rain—can be a powerful grounding experience." → Sage (3pts)
+- D) "Rain gear exists for a reason; your cardiovascular goals don't care about the weather." → Educator (2pts), Challenger (1pt)
+
 **Scoring System:**
 - Each question awards points to personas based on answer
 - Total points tallied per persona
