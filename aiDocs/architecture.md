@@ -293,186 +293,58 @@ interface Persona {
 ## Core Algorithms
 
 ### 1. Quiz Scoring Algorithm
+**Function:** `calculateQuizResults(answers: number[]): QuizResults`
 
-```typescript
-function calculateQuizResults(answers: number[]): QuizResults {
-  // Initialize scores
-  const scores: PersonaScores = {
-    sunny: 0,
-    drQuinn: 0,
-    pep: 0,
-    rico: 0,
-    fern: 0,
-    rusty: 0
-  };
-  
-  // Each answer maps to persona points
-  // Example: Question 1, Answer A → { sunny: 2, pep: 1 }
-  answers.forEach((answerIndex, questionIndex) => {
-    const pointMap = QUIZ_SCORING_MAP[questionIndex][answerIndex];
-    Object.entries(pointMap).forEach(([persona, points]) => {
-      scores[persona as PersonaType] += points;
-    });
-  });
-  
-  // Calculate total and percentages
-  const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
-  const percentages: PersonaPercentages = {
-    sunny: Math.round((scores.sunny / total) * 100),
-    drQuinn: Math.round((scores.drQuinn / total) * 100),
-    pep: Math.round((scores.pep / total) * 100),
-    rico: Math.round((scores.rico / total) * 100),
-    fern: Math.round((scores.fern / total) * 100),
-    rusty: Math.round((scores.rusty / total) * 100)
-  };
-  
-  // Find top persona
-  const topPersona = Object.entries(scores)
-    .reduce((max, [persona, score]) => 
-      score > max.score ? { persona, score } : max,
-      { persona: 'sunny', score: 0 }
-    ).persona as PersonaType;
-  
-  return {
-    timestamp: new Date(),
-    answers,
-    scores,
-    percentages,
-    topPersona
-  };
-}
-```
+**Logic:**
+- Initialize scores for all 6 personas (Sunny, Dr. Quinn, Pep, Rico, Fern, Rusty)
+- Map each answer to persona points (e.g., Question 1, Answer A → { sunny: 2, pep: 1 })
+- Calculate total points and convert to percentages
+- Identify top persona (highest score)
+- Return QuizResults object with scores, percentages, and top persona
 
 ### 2. Notification Selection Algorithm
+**Function:** `selectNotification(personaWeights, context, previousNotifications): NotificationTemplate`
 
-```typescript
-function selectNotification(
-  personaWeights: PersonaPercentages,
-  context: NotificationContext,
-  previousNotifications: Notification[]
-): NotificationTemplate {
-  
-  // 1. Get all available messages
-  const allMessages = NOTIFICATION_LIBRARY;
-  
-  // 2. Filter by context (time of day, streak status, etc.)
-  const contextFiltered = allMessages.filter(msg => 
-    matchesContext(msg, context)
-  );
-  
-  // 3. Exclude recently shown messages (no repeats within session)
-  const previousIds = new Set(previousNotifications.map(n => n.id));
-  const availableMessages = contextFiltered.filter(msg => 
-    !previousIds.has(msg.id)
-  );
-  
-  // 4. Build weighted pool based on user's persona preferences
-  const weightedPool: NotificationTemplate[] = [];
-  availableMessages.forEach(msg => {
-    const personaWeight = personaWeights[msg.persona] / 100;
-    const baseWeight = msg.weight || 1.0;
-    const finalWeight = personaWeight * baseWeight;
-    
-    // Add message to pool N times based on weight
-    const count = Math.round(finalWeight * 10);
-    for (let i = 0; i < count; i++) {
-      weightedPool.push(msg);
-    }
-  });
-  
-  // 5. Randomly select from weighted pool
-  const randomIndex = Math.floor(Math.random() * weightedPool.length);
-  return weightedPool[randomIndex];
-}
+**Logic:**
+1. Filter all messages by context (time of day, streak status, etc.)
+2. Exclude recently shown messages (no repeats within session)
+3. Build weighted pool based on user's persona preferences
+4. Calculate weight: (persona percentage / 100) × base weight
+5. Randomly select from weighted pool
+6. Return selected NotificationTemplate
 
-function matchesContext(
-  template: NotificationTemplate,
-  context: NotificationContext
-): boolean {
-  // Check if template tags match context
-  const { tags } = template;
-  const { timeOfDay, goalMet, streakLength } = context;
-  
-  // Time-based filtering
-  if (tags.includes('morning') && timeOfDay !== 'morning') return false;
-  if (tags.includes('evening') && timeOfDay !== 'evening') return false;
-  
-  // Context-based filtering
-  if (tags.includes('close_to_goal') && context.stepsRemaining > 1000) return false;
-  if (tags.includes('milestone') && streakLength % 7 !== 0) return false;
-  
-  return true;
-}
-```
+**Context Matching:**
+- Time-based filtering (morning/evening tags)
+- Goal-based filtering (close_to_goal, milestone tags)
+- Streak-based filtering (milestone detection)
 
 ### 3. Context Injection
+**Function:** `injectContext(template, context, demoState): string`
 
-```typescript
-function injectContext(
-  template: string,
-  context: NotificationContext,
-  demoState: DemoState
-): string {
-  let message = template;
-  
-  // Define available variables
-  const variables: Record<string, string | number> = {
-    streak_length: context.streakLength,
-    steps_remaining: context.stepsRemaining,
-    steps_taken: context.stepsTaken,
-    daily_goal: demoState.dailyGoal,
-    day_of_week: context.dayOfWeek,
-    minutes_remaining: Math.ceil(context.stepsRemaining / 100), // ~100 steps/min
-    // Calculated values
-    streak_length_plus_1: context.streakLength + 1,
-    milestone_next: Math.ceil((context.streakLength + 1) / 7) * 7,
-  };
-  
-  // Replace all {{variable}} patterns
-  Object.entries(variables).forEach(([key, value]) => {
-    const pattern = new RegExp(`{{${key}}}`, 'g');
-    message = message.replace(pattern, String(value));
-  });
-  
-  return message;
-}
-```
+**Available Variables:**
+- `{{streak_length}}` - Current streak count
+- `{{steps_remaining}}` - Steps to reach goal
+- `{{steps_taken}}` - Steps completed today
+- `{{daily_goal}}` - User's step goal
+- `{{day_of_week}}` - Monday, Tuesday, etc.
+- `{{minutes_remaining}}` - Calculated (~100 steps/min)
+- `{{streak_length_plus_1}}` - Tomorrow's streak
+- `{{milestone_next}}` - Next 7-day milestone
+
+**Logic:**
+- Replace all `{{variable}}` patterns with actual values
+- Calculate derived values (minutes, next milestone)
+- Return final message string
 
 ### 4. Streak Calculation
+**Function:** `calculateStreak(calendarData: DayData[]): number`
 
-```typescript
-function calculateStreak(calendarData: DayData[]): number {
-  // Sort by date descending (most recent first)
-  const sorted = [...calendarData].sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-  
-  let streak = 0;
-  let currentDate = new Date();
-  
-  for (const day of sorted) {
-    const dayDate = new Date(day.date);
-    
-    // Check if this day is consecutive
-    const daysDiff = Math.floor(
-      (currentDate.getTime() - dayDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    
-    if (daysDiff === streak) {
-      if (day.goalMet || day.isFreeze) {
-        streak++;
-        continue;
-      } else {
-        break; // Streak broken
-      }
-    } else if (daysDiff > streak) {
-      break; // Gap in streak
-    }
-  }
-  
-  return streak;
-}
-```
+**Logic:**
+- Sort calendar data by date (most recent first)
+- Iterate through days checking consecutive completion
+- Count day if goal met OR freeze used
+- Break on first gap or missed day
+- Return current streak length
 
 ---
 
@@ -624,74 +496,29 @@ function calculateStreak(calendarData: DayData[]): number {
 
 ## State Management Strategy
 
-### Option 1: Zustand (Recommended)
+### Zustand (Selected Approach)
 
-**Pros:**
+**Why Zustand:**
 - Minimal boilerplate
 - TypeScript support out of the box
 - Easy to persist to LocalStorage
 - Can use outside React components (utility functions)
 
-**Example Store:**
-```typescript
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+**Store Structure:**
+- Demo state (streak, steps, notifications)
+- Quiz results (personas, scores)
+- User preferences (weights, settings)
 
-interface DemoStore extends DemoState {
-  // Actions
-  addNotification: (notification: Notification) => void;
-  updateSteps: (steps: number) => void;
-  updatePersonaWeights: (weights: PersonaPercentages) => void;
-  resetDemo: () => void;
-}
+**Persistence:**
+- Use `persist` middleware for LocalStorage
+- Key: `walki-demo-storage`
+- Only persist: persona weights, settings
+- Session-only: notification history
 
-export const useDemoStore = create<DemoStore>()(
-  persist(
-    (set) => ({
-      // Initial state
-      currentStreak: 18,
-      todaySteps: 6247,
-      dailyGoal: 7000,
-      notificationHistory: [],
-      // ... other state
-      
-      // Actions
-      addNotification: (notification) =>
-        set((state) => ({
-          notificationHistory: [notification, ...state.notificationHistory]
-        })),
-      
-      updateSteps: (steps) =>
-        set({ todaySteps: steps }),
-      
-      updatePersonaWeights: (weights) =>
-        set({ personaWeights: weights }),
-      
-      resetDemo: () => set(INITIAL_DEMO_STATE),
-    }),
-    {
-      name: 'walki-demo-storage', // LocalStorage key
-      partialize: (state) => ({
-        // Only persist these fields
-        personaWeights: state.personaWeights,
-        settings: state.settings,
-      }),
-    }
-  )
-);
-```
-
-**Usage in Components:**
-```typescript
-function HomeScreen() {
-  const { currentStreak, todaySteps, addNotification } = useDemoStore();
-  // ... component logic
-}
-```
-
-### Option 2: React Context (Alternative)
-
-Simpler but more boilerplate. Use if team prefers standard React patterns.
+**Usage Pattern:**
+- Import hook in components: `const { currentStreak } = useDemoStore()`
+- Access state and actions directly
+- Automatic re-renders on state changes
 
 ---
 
@@ -699,32 +526,25 @@ Simpler but more boilerplate. Use if team prefers standard React patterns.
 
 ### Static Hosting (Vercel)
 
-```
-GitHub Repository
-    ↓ (push to main)
-Vercel CI/CD Pipeline
-    ↓
-1. Install dependencies (npm install)
-2. Build (npm run build)
-    └─> Vite builds static files to /dist
-    └─> Optimizes images, minifies JS/CSS
-3. Deploy to CDN
-    └─> Global edge network
-    └─> Automatic HTTPS
-    └─> Custom domain: demo.walki.app
-```
+**Deployment Flow:**
+1. Push to main branch on GitHub
+2. Vercel CI/CD automatically triggers
+3. Install dependencies (`npm install`)
+4. Build production bundle (`npm run build`)
+5. Vite outputs to `/dist` directory
+6. Deploy to global CDN with automatic HTTPS
+7. Custom domain: demo.walki.app
 
-**Vercel Configuration** (`vercel.json`):
-```json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
-```
+**Vercel Configuration:**
+- Build command: `npm run build`
+- Output directory: `dist`
+- Framework: Vite
+- Rewrites: Route all paths to `/index.html` (SPA)
+
+**Environment:**
+- Node version: 18+
+- Deployment time: <3 minutes
+- Global edge network for fast loading
 
 ---
 
@@ -739,88 +559,49 @@ Vercel CI/CD Pipeline
 ### Optimization Strategies
 
 **1. Code Splitting**
-```typescript
-// Lazy load pages
-const Landing = lazy(() => import('./pages/Landing'));
-const Quiz = lazy(() => import('./pages/Quiz'));
-const Demo = lazy(() => import('./pages/Demo'));
-```
+- Lazy load pages (Landing, Quiz, Demo)
+- Split vendor bundles (React, etc.)
+- Dynamic imports for heavy components
 
 **2. Asset Optimization**
-- Use SVG for personas (scalable, small)
+- SVG for personas (scalable, small)
 - Lazy load images with `loading="lazy"`
 - Preload critical assets
+- WebP format with fallbacks
 
-**3. TailwindCSS Purging**
-```javascript
-// tailwind.config.js
-module.exports = {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  theme: {
-    screens: {
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-    },
-    extend: {
-      colors: {
-        persona: {
-          sunny: '#F97316',    // Warm Orange
-          quinn: '#3B82F6',    // Deep Blue
-          pep: '#EC4899',      // Bright Pink
-          rico: '#EF4444',     // Bold Red
-          fern: '#10B981',     // Calming Green
-          rusty: '#6B7280',    // Dark Gray
-        },
-      },
-    },
-  },
-  // Purges unused styles in production
-};
-```
+**3. TailwindCSS Configuration**
+- Purge unused styles in production
+- Mobile-first breakpoints: 320px, 375px, 768px, 1024px
+- Persona colors as CSS custom properties
+- JIT mode for minimal bundle size
 
-**4. Memoization**
-```typescript
-// Expensive calculations
-const personaPercentages = useMemo(
-  () => calculatePercentages(scores),
-  [scores]
-);
-```
+**4. React Optimization**
+- Memoize expensive calculations (`useMemo`)
+- Avoid unnecessary re-renders
+- Component lazy loading
+- Virtual scrolling for long lists (if needed)
 
 ---
 
 ## Security Considerations
 
 ### Client-Side Security
-
-**1. Input Validation**
-- Sanitize all user inputs (step entry, settings)
-- Validate email format for waitlist
-- Prevent XSS in notification messages
-
-**2. LocalStorage Security**
-- No sensitive data stored
-- Clear on logout (if auth added later)
-- Validate data on read (could be tampered)
-
-**3. CSP Headers**
-```
-Content-Security-Policy: 
-  default-src 'self'; 
-  script-src 'self' plausible.io; 
-  style-src 'self' 'unsafe-inline'; 
-  img-src 'self' data:;
-```
+- **Input Validation:** Sanitize user inputs (step entry, settings)
+- **Email Validation:** Validate format for waitlist
+- **XSS Prevention:** Prevent injection in notification messages
+- **LocalStorage:** No sensitive data stored, validate on read
 
 ### Privacy
-
 **No tracking beyond Plausible:**
 - No cookies
 - No third-party scripts (except Plausible)
 - No user identification
 - No data sharing
+
+**CSP Headers:**
+- Restrict script sources to self and Plausible
+- Allow inline styles (required by Tailwind)
+- Restrict image sources
 
 ---
 
@@ -858,31 +639,25 @@ Content-Security-Policy:
 ### Plausible Analytics
 
 **Events to Track:**
-```typescript
-// Page views (automatic)
-// + Custom events:
-
-plausible('Quiz Started');
-plausible('Quiz Completed', { props: { topPersona: 'sunny' } });
-plausible('Demo Opened');
-plausible('Notification Generated', { props: { persona: 'pep' } });
-plausible('Waitlist Signup');
-plausible('Quiz Shared');
-plausible('Persona Weight Adjusted');
-```
+- `Quiz Started` - User begins quiz
+- `Quiz Completed` - Quiz finished (include top persona)
+- `Demo Opened` - User enters demo
+- `Notification Generated` - "Get Motivation" clicked (include persona)
+- `Waitlist Signup` - Email submitted
+- `Quiz Shared` - Results shared
+- `Persona Weight Adjusted` - User customizes preferences
 
 **Goals:**
-- Quiz completion rate
-- Time to completion
+- Quiz completion rate (>70%)
+- Average time on demo (>3 min)
 - Most popular personas
-- Waitlist conversion
+- Waitlist conversion (>20%)
 
 ### Error Tracking
-
-**Sentry (Optional):**
+**Sentry (Optional for Phase 10):**
 - Catch JavaScript errors
 - Report to dashboard
-- Filter noise (ignore non-critical)
+- Filter non-critical noise
 
 ---
 
@@ -1111,57 +886,40 @@ Scale (thousands of users)
 ### 5 MVP Metrics (Tracking Implementation)
 
 #### 1. Quiz Completion Rate (Target: >70%)
-```typescript
-// Analytics event tracking
-plausible('Quiz Started');  // On /quiz load
-plausible('Quiz Completed', { props: { topPersona: 'sunny' } }); // On completion
-// Calculate: Quiz Completed / Quiz Started
-```
+**Track:** Quiz Started events vs Quiz Completed events  
+**Implementation:** Fire analytics events at quiz entry and completion
 
 #### 2. Demo Engagement Time (Target: >3 minutes)
-```typescript
-// Track time spent on /demo page
-const startTime = Date.now();
-// On page exit or beforeunload:
-const duration = (Date.now() - startTime) / 1000;
-plausible('Demo Session', { props: { duration } });
-```
+**Track:** Time spent on /demo page  
+**Implementation:** Track start time on mount, calculate duration on unmount
 
 #### 3. "Get Motivation" Click Rate (Target: >3 per session)
-```typescript
-// Track each click
-plausible('Notification Generated', { props: { persona: 'pep' } });
-// Calculate: clicks per unique demo session
-```
+**Track:** Count of Notification Generated events per unique session  
+**Implementation:** Fire event each time button clicked with persona data
 
 #### 4. Waitlist Conversion (Target: >20%)
-```typescript
-plausible('Waitlist Signup');
-// Calculate: Waitlist Signups / Demo Visitors
-```
+**Track:** Waitlist Signups vs Demo Visitors  
+**Implementation:** Fire event on successful form submission
 
 #### 5. Social Share Rate (Target: >5%)
-```typescript
-plausible('Quiz Shared');  // From results page
-plausible('Waitlist Shared');  // From thank you page
-// Calculate: Share Events / Total Visitors
-```
+**Track:** Share events vs total visitors  
+**Implementation:** Fire event when Web Share API or copy link used
 
 ### Analytics Dashboard Configuration
-Create custom Plausible dashboard with:
-- Quiz completion funnel
-- Average time on /demo
-- Get Motivation clicks per session
-- Waitlist conversion rate
+- Quiz completion funnel visualization
+- Average time on /demo page
+- Get Motivation clicks per session distribution
+- Waitlist conversion rate by traffic source
 - Share event tracking
 
 ### Performance Metrics (Lighthouse)
-- **Performance:** >90
-- **Accessibility:** >90
-- **Best Practices:** >90
-- **SEO:** >90
-- **Initial Load:** <3 seconds
-- **Bundle Size:** <200KB gzipped (initial JS)
+**Targets:**
+- Performance: >90
+- Accessibility: >90
+- Best Practices: >90
+- SEO: >90
+- Initial Load: <3 seconds
+- Bundle Size: <200KB gzipped (initial JS)
 
 ---
 
