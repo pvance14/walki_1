@@ -107,11 +107,13 @@ External (Optional):
 - Minimal bundle size (purged unused styles)
 
 ### UI Components
-**Shadcn/ui or Radix UI**
+**Shadcn/ui**
 - Accessible by default (WCAG 2.1 AA)
 - Unstyled primitives (easy to customize)
 - Keyboard navigation
 - Screen reader support
+- Default style with Zinc slate theme
+- CSS variables for theming
 
 ### Animations
 **Framer Motion**
@@ -121,16 +123,19 @@ External (Optional):
 - Used for: progress bars, confetti, page transitions
 
 ### Data Visualization
-**Recharts or Chart.js**
+**Recharts**
 - Quiz results charts (bar/pie)
-- Lightweight
-- Responsive
+- React-first integration
+- Responsive container support
+- Persona color customization
+- Lightweight with tree-shaking
 
 ### State Management
-**Zustand or React Context**
+**Zustand**
 - Simple, minimal boilerplate
-- TypeScript support
-- Persist state to LocalStorage
+- TypeScript support out of the box
+- Built-in persist middleware for LocalStorage
+- Can be used outside React components (utility functions)
 - Global state for: quiz results, demo state, notification history
 
 ### Routing
@@ -145,6 +150,14 @@ External (Optional):
 - Store demo state
 - No database needed
 - ~5-10MB available (more than enough)
+- Keys: `walki_quiz_progress`, `walki-demo-storage`
+
+### Testing
+**Vitest**
+- Fast unit test runner
+- Vite-native integration
+- Test coverage for algorithms
+- Component testing support
 
 ---
 
@@ -742,7 +755,27 @@ const Demo = lazy(() => import('./pages/Demo'));
 ```javascript
 // tailwind.config.js
 module.exports = {
-  content: ['./src/**/*.{js,jsx,ts,tsx}'],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    screens: {
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+    },
+    extend: {
+      colors: {
+        persona: {
+          sunny: '#F97316',    // Warm Orange
+          quinn: '#3B82F6',    // Deep Blue
+          pep: '#EC4899',      // Bright Pink
+          rico: '#EF4444',     // Bold Red
+          fern: '#10B981',     // Calming Green
+          rusty: '#6B7280',    // Dark Gray
+        },
+      },
+    },
+  },
   // Purges unused styles in production
 };
 ```
@@ -881,23 +914,345 @@ Scale (thousands of users)
 
 ---
 
+## Implementation Timeline
+
+### 10-Phase Development Breakdown
+
+**Total Timeline:** 2 weeks (10 working days)
+
+#### Phase 0: Foundation (Days 1-2)
+- Initialize React + TypeScript + Vite project
+- Configure TailwindCSS with mobile-first breakpoints
+- Set up Git workflow and Vercel/Netlify deployment
+- Install essential dependencies (React Router, Zustand)
+- Create base file structure
+- Configure TypeScript strict mode
+- Implement error boundaries
+- **Deliverable:** Working empty app deployed to staging URL
+
+#### Phase 1: Data Foundation (Days 2-3)
+- Define TypeScript interfaces per data models
+- Implement 7 quiz questions with scoring algorithm
+- Define 6 persona configurations with official names and colors
+- Generate 300 notification message templates (50 per persona)
+- Create demo data (18-day streak, 6,247/7,000 steps, 1 freeze, 1 missed day)
+- Implement core algorithms: quiz scoring, notification selection, context injection, streak calculation
+- Write unit tests for all algorithms using Vitest
+- **Deliverable:** All data and business logic complete and tested
+
+#### Phase 2: Component Library (Days 3-4)
+- Set up Shadcn/ui with Tailwind integration
+- Implement persona color scheme (6 distinct colors)
+- Create base components (Button, Input, Modal, Card)
+- Build ProgressBar with animations
+- Build StreakCounter with milestone effects
+- Build NotificationCard with persona styling
+- Build PersonaCard with hover effects
+- Build quiz components (QuizQuestion, QuizProgress)
+- Implement responsive navigation
+- Set up Framer Motion for animations
+- **Deliverable:** Complete component library
+
+#### Phase 3: Landing Page (Days 4-5)
+- Hero section with headline and CTA
+- Problem statement section
+- Solution overview with persona previews
+- How It Works section
+- Privacy promise section
+- Footer with links
+- Mobile responsive design
+- Animations and micro-interactions
+- Meta tags for SEO and social sharing
+- **Deliverable:** Production-ready landing page
+
+#### Phase 4: Motivation Quiz (Days 5-6)
+- Quiz introduction screen
+- Question flow with progress indicator (1 of 7)
+- Answer selection with hover states
+- Back button to revise answers
+- Quiz completion and scoring
+- Zustand store setup for quiz state
+- LocalStorage persistence (resume incomplete quiz)
+- Mobile-optimized touch interactions
+- Loading states and transitions
+- Navigation to results page
+- **Deliverable:** Fully functional quiz flow
+
+#### Phase 5: Quiz Results & Persona Showcase (Days 6-7)
+- Results screen with persona percentages
+- Recharts bar/pie chart visualization
+- Top persona callout
+- Detailed persona showcase
+- Example messages for each persona
+- Shareable results feature (Web Share API)
+- Quiz retake option
+- CTA to enter demo
+- Animations for result reveal
+- Mobile-responsive charts
+- **Deliverable:** Complete results and showcase experience
+
+#### Phase 6: Interactive Demo - Core (Days 7-8)
+- Demo home screen layout
+- Streak counter display (18 days)
+- Progress bar (6,247/7,000 steps)
+- Step entry modal
+- "Get Motivation" notification generator
+- Notification history feed
+- Bottom navigation (Home, Calendar, Personas, Settings)
+- Zustand store for demo session
+- LocalStorage for session persistence
+- Real-time updates when steps added
+- Milestone celebration modal
+- **Deliverable:** Core demo experience functional
+
+#### Phase 7: Interactive Demo - Extended (Days 8-9)
+- Calendar view with streak visualization
+- Day detail modal (click calendar day)
+- Personas tab with weight sliders
+- Settings tab (notification timing, goals)
+- Persona weight adjustment
+- Demo data updates based on settings
+- Context-aware notification generation
+- Streak freeze explanation
+- All tab navigation working
+- Mobile-optimized interactions
+- **Deliverable:** Full demo experience
+
+#### Phase 8: Waitlist & Integration (Day 9)
+- Waitlist form design with email validation
+- Integration with Google Sheets for MVP
+- Thank you state after signup
+- Social sharing from waitlist
+- Terms of Service page (simplified for demo)
+- Privacy Policy page (plain English)
+- Plausible analytics integration
+- Configure analytics event tracking for MVP metrics
+- Event tracking implementation
+- Privacy-compliant analytics (no cookies)
+- Error handling for form submission
+- **Deliverable:** Complete user acquisition funnel with analytics
+
+#### Phase 9: Polish & Optimization (Day 10)
+- Cross-browser testing (Chrome, Safari, Firefox)
+- Mobile device testing (iOS Safari, Chrome Android)
+- Accessibility audit (keyboard navigation, screen reader)
+- Performance optimization (Lighthouse score >90)
+- Image optimization (WebP, lazy loading)
+- Bundle size optimization (code splitting)
+- Error state handling throughout app
+- Loading state polish
+- Animation timing refinement
+- Copy editing and proofreading
+- Meta tags and Open Graph images
+- 404 page
+- Validate MVP success metrics targets
+- **Deliverable:** Production-ready application
+
+#### Phase 10: Launch Prep (Day 10+)
+- Final production deployment
+- Custom domain setup (demo.walki.app)
+- Smoke testing in production
+- Analytics verification
+- Social sharing verification
+- Product Hunt submission prep
+- Beta tester outreach
+- Launch checklist completion
+- Error monitoring setup (optional Sentry)
+- Prepare launch content
+- **Deliverable:** Live, launched demo
+
+### Critical Path Items
+**Must not slip:**
+1. Quiz scoring algorithm (validates core concept)
+2. Notification generation (shows persona variety)
+3. Mobile responsiveness (test at each phase)
+4. Performance (<3s load time)
+5. Persona names and colors match spec
+6. Demo data accuracy
+
+**Can simplify if needed:**
+1. Chart visualizations (simple bars vs fancy charts)
+2. Animations (reduce complexity)
+3. Calendar detail view (less info per day)
+4. Settings granularity (fewer options)
+
+---
+
+## Technical Decisions (Confirmed)
+
+### Technology Stack Decisions
+- **Frontend Framework:** React 18+ with TypeScript ✅
+- **Build Tool:** Vite ✅
+- **Styling:** TailwindCSS with mobile-first breakpoints ✅
+- **UI Components:** Shadcn/ui (not Radix UI directly) ✅
+- **Charts:** Recharts (not Chart.js) ✅
+- **State Management:** Zustand (not React Context) ✅
+- **Testing:** Vitest ✅
+- **Animations:** Framer Motion ✅
+- **Routing:** React Router v6 ✅
+- **Hosting:** Vercel ✅
+- **Analytics:** Plausible (privacy-first) ✅
+- **Waitlist:** Google Sheets for MVP, migrate to ConvertKit later ✅
+
+### Key Configuration Decisions
+- **TypeScript:** Strict mode enabled
+- **Node Version:** 18+
+- **Build Output:** `/dist` directory
+- **Path Aliases:** `@/` for `./src`
+- **Persona Colors:** CSS variables in Tailwind config
+- **LocalStorage Keys:** `walki_quiz_progress`, `walki-demo-storage`
+- **Custom Domain:** demo.walki.app
+- **Reduced Motion:** All animations respect `prefers-reduced-motion`
+
+---
+
+## Success Metrics Configuration
+
+### 5 MVP Metrics (Tracking Implementation)
+
+#### 1. Quiz Completion Rate (Target: >70%)
+```typescript
+// Analytics event tracking
+plausible('Quiz Started');  // On /quiz load
+plausible('Quiz Completed', { props: { topPersona: 'sunny' } }); // On completion
+// Calculate: Quiz Completed / Quiz Started
+```
+
+#### 2. Demo Engagement Time (Target: >3 minutes)
+```typescript
+// Track time spent on /demo page
+const startTime = Date.now();
+// On page exit or beforeunload:
+const duration = (Date.now() - startTime) / 1000;
+plausible('Demo Session', { props: { duration } });
+```
+
+#### 3. "Get Motivation" Click Rate (Target: >3 per session)
+```typescript
+// Track each click
+plausible('Notification Generated', { props: { persona: 'pep' } });
+// Calculate: clicks per unique demo session
+```
+
+#### 4. Waitlist Conversion (Target: >20%)
+```typescript
+plausible('Waitlist Signup');
+// Calculate: Waitlist Signups / Demo Visitors
+```
+
+#### 5. Social Share Rate (Target: >5%)
+```typescript
+plausible('Quiz Shared');  // From results page
+plausible('Waitlist Shared');  // From thank you page
+// Calculate: Share Events / Total Visitors
+```
+
+### Analytics Dashboard Configuration
+Create custom Plausible dashboard with:
+- Quiz completion funnel
+- Average time on /demo
+- Get Motivation clicks per session
+- Waitlist conversion rate
+- Share event tracking
+
+### Performance Metrics (Lighthouse)
+- **Performance:** >90
+- **Accessibility:** >90
+- **Best Practices:** >90
+- **SEO:** >90
+- **Initial Load:** <3 seconds
+- **Bundle Size:** <200KB gzipped (initial JS)
+
+---
+
+## Development Workflow
+
+### Phase-by-Phase Approach
+Each phase builds on the previous with clear deliverables:
+1. Complete all tasks for current phase
+2. Test deliverables meet success criteria
+3. Commit to Git with descriptive message
+4. Deploy to staging for verification
+5. Mobile-first testing checkpoint
+6. Proceed to next phase only when complete
+
+### Testing Strategy Per Phase
+**Phase 0-1:** Foundation testing
+- Dev server performance (<5s startup)
+- TypeScript compilation (no errors)
+- Unit tests for algorithms (Vitest)
+
+**Phase 2:** Component testing
+- Component showcase page for isolation testing
+- Responsive breakpoint testing (320px, 375px, 768px, 1024px)
+- Accessibility basics (keyboard nav, focus states)
+
+**Phase 3-7:** Integration testing
+- User flow testing (Landing → Quiz → Results → Demo)
+- LocalStorage persistence verification
+- State management correctness
+
+**Phase 8:** Analytics testing
+- Event tracking verification
+- Form submission testing
+- Error handling scenarios
+
+**Phase 9:** Quality assurance
+- Cross-browser testing (Chrome, Safari, Firefox)
+- Mobile device testing (iOS Safari, Chrome Android)
+- Accessibility audit (VoiceOver/NVDA)
+- Performance audit (Lighthouse)
+
+**Phase 10:** Production validation
+- Smoke testing in production environment
+- Analytics data verification
+- Social sharing preview testing
+
+### Mobile-First Testing Checkpoints
+**Every phase must verify:**
+- ✅ Touch targets minimum 44px
+- ✅ No horizontal scroll at 320px width
+- ✅ Content readable without zoom
+- ✅ Forms work on mobile keyboards
+- ✅ Animations perform smoothly on devices
+
+**Key mobile breakpoints:**
+- 320px (iPhone SE)
+- 375px (iPhone 12/13)
+- 390px (iPhone 14)
+- 768px (iPad portrait)
+- 1024px (iPad landscape)
+
+### Deployment Verification at Each Phase
+**Staging deployment checklist:**
+1. Run `npm run build` locally (verify no errors)
+2. Push to main branch
+3. Vercel auto-deploy triggers
+4. Wait for deployment complete (<3 min)
+5. Visit staging URL
+6. Test key functionality for current phase
+7. Check browser console (no errors)
+8. Verify mobile responsive on real device
+
+**Rollback procedure:**
+- Revert to previous deployment in Vercel dashboard
+- Or revert Git commit and push
+
+---
+
 ## Open Questions & Decisions
 
-### State Management
-- **Decision needed:** Zustand vs. React Context?
-  - **Recommendation:** Zustand (simpler, better TypeScript support)
+### Resolved Decisions
+- ✅ State Management: **Zustand** (simpler, better TypeScript support)
+- ✅ UI Component Library: **Shadcn/ui** (pre-styled, faster to build with)
+- ✅ Charting Library: **Recharts** (React-first, easier integration)
+- ✅ Email Waitlist: **Google Sheets for MVP** (free, simple), migrate to ConvertKit later
+- ✅ Testing Framework: **Vitest** (Vite-native, fast)
 
-### UI Component Library
-- **Decision needed:** Shadcn/ui vs. Radix UI directly?
-  - **Recommendation:** Shadcn/ui (pre-styled, faster to build with)
-
-### Charting Library
-- **Decision needed:** Recharts vs. Chart.js?
-  - **Recommendation:** Recharts (React-first, easier integration)
-
-### Email Waitlist
-- **Decision needed:** ConvertKit vs. Google Sheets vs. Mailchimp?
-  - **Recommendation:** Google Sheets for MVP (free, simple), migrate later
+### Still Open
+- A/B testing framework (skip for MVP, add in iteration phase)
+- Figma mockups (optional - proceed with Tailwind prototyping)
+- Error monitoring: Sentry (optional for Phase 10)
 
 ---
 
@@ -931,3 +1286,4 @@ Static web demo, no backend
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | Feb 17, 2026 | Preston Vance | Initial architecture documentation |
+| 1.1 | Feb 18, 2026 | Preston Vance | Updated with detailed implementation decisions from 10-phase roadmap: confirmed tech stack (Shadcn/ui, Recharts, Zustand, Vitest), added implementation timeline, success metrics configuration, development workflow, testing strategy, mobile-first checkpoints, and deployment verification procedures |
