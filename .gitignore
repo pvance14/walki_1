@@ -3,7 +3,6 @@ ai/
 
 # AI Agent Files (local only)
 claude.md
-.cursorrules
 
 # Dependencies
 node_modules/

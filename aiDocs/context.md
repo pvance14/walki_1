@@ -7,6 +7,11 @@
 - **PRD:** `aiDocs/prd.md` - Full product requirements and feature specifications
 - **MVP:** `aiDocs/mvp.md` - Web-based interactive demo specification (2-week timeline)
 - **Architecture:** `aiDocs/architecture.md` - Technical architecture and implementation details
+- **Changelog:** `ai/changelog.md` - changelog with brief notes about each change to the codebase
+
+## Behavior
+- Whenever creating plan does and roadmap docs, always save them in ai/roadmaps. Prefix the name with the date. Add a note that we need to avoid over-engineering, cruft, and legacy-compatibility features in this clean code project.
+- Whenever finishing with implementing a plan / roadmap doc pair, make sure the roadmap is up to date (tasks checked off, etc). Then move the docs to ai/roadmaps/complete. Then update ai/changelog.md accordingly.
 
 ## Core Features
 
