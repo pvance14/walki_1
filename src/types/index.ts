@@ -71,7 +71,12 @@ export interface Settings {
   notificationFrequency: number;
   randomizeTiming: boolean;
   showStreakOnHome: boolean;
+  enableMorningNotifications: boolean;
+  enableAfternoonNotifications: boolean;
+  enableEveningNotifications: boolean;
 }
+
+export type DemoTab = 'home' | 'calendar' | 'personas' | 'settings';
 
 export interface DemoState {
   currentStreak: number;

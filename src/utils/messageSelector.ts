@@ -154,14 +154,16 @@ export function getDayOfWeek(date?: Date): string {
 export function createNotificationContext(
   streakLength: number,
   stepsTaken: number,
-  dailyGoal: number
+  dailyGoal: number,
+  timeOfDayOverride?: NotificationContext['timeOfDay'],
+  dateOverride?: Date,
 ): NotificationContext {
   return {
     streakLength,
     stepsRemaining: Math.max(0, dailyGoal - stepsTaken),
     stepsTaken,
     dailyGoal,
-    timeOfDay: getTimeOfDay(),
-    dayOfWeek: getDayOfWeek(),
+    timeOfDay: timeOfDayOverride ?? getTimeOfDay(dateOverride?.getHours()),
+    dayOfWeek: getDayOfWeek(dateOverride),
   };
 }

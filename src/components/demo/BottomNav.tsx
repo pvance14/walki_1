@@ -1,13 +1,19 @@
 import { cn } from '@/lib/cn';
+import type { DemoTab } from '@/types';
 
-const tabs = [
-  { id: 'home', label: 'Home', active: true },
-  { id: 'calendar', label: 'Calendar', active: false },
-  { id: 'personas', label: 'Personas', active: false },
-  { id: 'settings', label: 'Settings', active: false },
+const tabs: { id: DemoTab; label: string }[] = [
+  { id: 'home', label: 'Home' },
+  { id: 'calendar', label: 'Calendar' },
+  { id: 'personas', label: 'Personas' },
+  { id: 'settings', label: 'Settings' },
 ];
 
-export const BottomNav = () => {
+type BottomNavProps = {
+  activeTab: DemoTab;
+  onChangeTab: (tab: DemoTab) => void;
+};
+
+export const BottomNav = ({ activeTab, onChangeTab }: BottomNavProps) => {
   return (
     <nav
       aria-label="Demo navigation"
@@ -18,13 +24,13 @@ export const BottomNav = () => {
           <li key={tab.id}>
             <button
               type="button"
+              onClick={() => onChangeTab(tab.id)}
               className={cn(
                 'min-h-11 w-full rounded-md px-2 text-xs font-semibold transition-colors',
-                tab.active ? 'bg-slate-900 text-white' : 'bg-transparent text-slate-500',
+                activeTab === tab.id ? 'bg-slate-900 text-white' : 'bg-transparent text-slate-500',
               )}
-              disabled={!tab.active}
-              aria-current={tab.active ? 'page' : undefined}
-              aria-label={tab.active ? `${tab.label} tab, active` : `${tab.label} tab, coming soon`}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              aria-label={activeTab === tab.id ? `${tab.label} tab, active` : `${tab.label} tab`}
             >
               {tab.label}
             </button>
@@ -34,3 +40,5 @@ export const BottomNav = () => {
     </nav>
   );
 };
+
+export type { BottomNavProps };

@@ -244,6 +244,9 @@ export const DEMO_SETTINGS: Settings = {
   notificationFrequency: 2,
   randomizeTiming: true,
   showStreakOnHome: true,
+  enableMorningNotifications: true,
+  enableAfternoonNotifications: false,
+  enableEveningNotifications: true,
 };
 
 export const INITIAL_DEMO_STATE: DemoState = {
