@@ -1,4 +1,10 @@
 import type { PersonaId } from '@/types';
+import drQuinnPhoto from '@/photos/drquinn.png';
+import fernPhoto from '@/photos/fern.png';
+import pepPhoto from '@/photos/pep.png';
+import ricoPhoto from '@/photos/rico.png';
+import rustyPhoto from '@/photos/rusty.png';
+import sunnyPhoto from '@/photos/sunny.png';
 
 export const PERSONA_HEX: Record<PersonaId, string> = {
   sunny: '#F97316',
@@ -34,4 +40,13 @@ export const PERSONA_INITIALS: Record<PersonaId, string> = {
   rico: 'RI',
   fern: 'FE',
   rusty: 'RU',
+};
+
+export const PERSONA_PHOTO: Record<PersonaId, string> = {
+  sunny: sunnyPhoto,
+  'dr-quinn': drQuinnPhoto,
+  pep: pepPhoto,
+  rico: ricoPhoto,
+  fern: fernPhoto,
+  rusty: rustyPhoto,
 };

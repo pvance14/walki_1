@@ -1,6 +1,6 @@
 import type { Persona } from '@/types';
 import { cn } from '@/lib/cn';
-import { PERSONA_HEX, PERSONA_ICON, PERSONA_INITIALS, PERSONA_TINT_HEX } from '@/lib/persona';
+import { PERSONA_HEX, PERSONA_ICON, PERSONA_INITIALS, PERSONA_PHOTO, PERSONA_TINT_HEX } from '@/lib/persona';
 
 type PersonaCardProps = {
   persona: Persona;
@@ -10,6 +10,7 @@ type PersonaCardProps = {
 export const PersonaCard = ({ persona, onClick }: PersonaCardProps) => {
   const accentColor = PERSONA_HEX[persona.id];
   const tintColor = PERSONA_TINT_HEX[persona.id];
+  const personaPhoto = PERSONA_PHOTO[persona.id];
 
   return (
     <button
@@ -27,7 +28,11 @@ export const PersonaCard = ({ persona, onClick }: PersonaCardProps) => {
           aria-hidden="true"
           title={persona.name}
         >
-          <span>{PERSONA_ICON[persona.id] ?? PERSONA_INITIALS[persona.id]}</span>
+          {personaPhoto ? (
+            <img src={personaPhoto} alt="" className="h-full w-full rounded-full object-cover" />
+          ) : (
+            <span>{PERSONA_ICON[persona.id] ?? PERSONA_INITIALS[persona.id]}</span>
+          )}
         </div>
         <div>
           <h3 className="text-base font-semibold text-slate-900">{persona.name}</h3>

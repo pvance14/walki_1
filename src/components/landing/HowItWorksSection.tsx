@@ -5,7 +5,7 @@ import { Reveal } from './Reveal';
 const steps = [
   {
     title: 'Take Quiz',
-    description: 'Answer 7 fast questions so Walki can identify your motivation style.',
+    description: 'Answer 10 fast questions so Walki can identify your motivation style.',
   },
   {
     title: 'Get Your Persona',

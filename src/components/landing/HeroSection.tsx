@@ -43,7 +43,7 @@ export const HeroSection = () => {
               className="w-full max-w-sm transition-all duration-200 active:scale-[0.99] sm:w-auto"
               onClick={() => navigate('/quiz')}
             >
-              Start the 7-Question Quiz
+              Start the 10-Question Quiz
             </Button>
           </div>
         </Reveal>
