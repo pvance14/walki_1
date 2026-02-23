@@ -59,7 +59,7 @@ Landing Page
     ↓
 "Try the Quiz" (CTA)
     ↓
-Motivation Quiz (5-7 questions)
+Motivation Quiz (10 questions)
     ↓
 Quiz Results & Persona Showcase
     ↓
@@ -138,7 +138,7 @@ Interactive Demo Experience
 **Introduction Screen:**
 
 - "Let's figure out what actually motivates you"
-- "7 quick questions, no wrong answers"
+- "10 quick questions, no wrong answers"
 - "Your results will personalize the demo"
 - Start Quiz button
 
@@ -147,7 +147,7 @@ Interactive Demo Experience
 - Scenario-based (not direct "what motivates you?")
 - 4 answer choices per question
 - Each choice maps to 1-2 personas
-- Progress indicator (Question 2 of 7)
+- Progress indicator (Question 2 of 10)
 - "Back" button to revise answers
 
 **10 Questions:**
@@ -172,7 +172,7 @@ Interactive Demo Experience
 "Why do you want to walk more consistently?"
 
 - A) "To feel energized and proud of myself" → Cheerleader (2pts), Companion (1pt)
-- B) "For specific health benefits my doctor mentioned" → Educator (3pts)
+- B) "For specific health benefits I'm looking to achieve" → Educator (3pts)
 - C) "To prove I can stick with something" → Challenger (2pts), Pessimist (1pt)
 - D) "To clear my mind and reduce stress" → Sage (3pts)
 
@@ -1242,7 +1242,7 @@ After 100+ demo users:
 
 **Mitigation:**
 
-- Keep to 7 questions max
+- Keep to 10 questions max
 - Make questions scenario-based (engaging, not clinical)
 - Add progress indicator
 - Allow "Back" button to revise answers
@@ -1311,7 +1311,7 @@ After 100+ demo users:
 **2. Quiz (2-3 minutes)**
 
 - Intro: "Let's figure out what actually motivates you"
-- Answers 7 questions, relating to scenarios
+- Answers 10 questions, relating to scenarios
 - Likes the humor in options
 - Clicks submit
 
@@ -1386,4 +1386,3 @@ This MVP is designed to validate the core hypothesis: **AI personas make walking
 3. [ ] Create Figma mockups (optional but recommended)
 4. [ ] Begin Week 1 development
 5. [ ] Schedule user testing sessions for Week 2
-

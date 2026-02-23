@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import LandingPage from './pages/LandingPage';
+import QuizIntroPage from './pages/QuizIntroPage';
 import QuizPage from './pages/QuizPage';
+import QuizResultsPage from './pages/QuizResultsPage';
 import DemoPage from './pages/DemoPage';
 import ComponentShowcasePage from './pages/ComponentShowcasePage';
 
@@ -11,7 +13,9 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/quiz" element={<QuizIntroPage />} />
+          <Route path="/quiz/questions" element={<QuizPage />} />
+          <Route path="/results" element={<QuizResultsPage />} />
           <Route path="/demo" element={<DemoPage />} />
           <Route path="/showcase" element={<ComponentShowcasePage />} />
         </Routes>

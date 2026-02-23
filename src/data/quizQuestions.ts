@@ -64,7 +64,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         id: 'q3b',
-        text: 'For specific health benefits my doctor mentioned',
+        text: "For specific health benefits I'm looking to achieve",
         scores: { 'dr-quinn': 3 },
       },
       {

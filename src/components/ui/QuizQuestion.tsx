@@ -20,7 +20,7 @@ export const QuizQuestion = ({ question, selectedOptionId, onSelectOption }: Qui
               key={option.id}
               type="button"
               className={cn(
-                'min-h-11 rounded-lg border px-4 py-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
+                'min-h-11 touch-manipulation rounded-lg border px-4 py-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
                 isSelected
                   ? 'border-slate-900 bg-slate-900 text-white'
                   : 'border-slate-300 bg-white text-slate-800 hover:border-slate-500',

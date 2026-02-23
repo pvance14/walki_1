@@ -10,7 +10,7 @@ export const QuizProgress = ({ current, total }: QuizProgressProps) => {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-sm text-slate-700">
-        <span>Question {current} / {total}</span>
+        <span>Question {current} of {total}</span>
         <span>{progress}%</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-slate-200">

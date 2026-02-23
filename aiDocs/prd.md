@@ -134,7 +134,7 @@ Walki is a privacy-first mobile walking app that uses AI-powered personas to hel
 #### 1.1 Core Features (Must-Have)
 
 **Onboarding & Motivation Quiz**
-- 5-7 question interactive quiz to determine motivation profile
+- 10-question interactive quiz to determine motivation profile
 - Scenario-based questions (not direct "what motivates you?")
 - Results show persona weightings (e.g., 40% Cheerleader, 30% Educator, 20% Companion, 10% Challenger)
 - Shareable results screen (social growth mechanism)
@@ -189,7 +189,7 @@ Walki is a privacy-first mobile walking app that uses AI-powered personas to hel
 **First-Time User Flow:**
 1. Download app → Welcome screen
 2. Permission requests (step tracking, notifications) with clear explanations
-3. Motivation quiz (5-7 questions, ~2 minutes)
+3. Motivation quiz (10 questions, ~3 minutes)
 4. Results screen showing persona weightings (shareable)
 5. Set daily step goal
 6. Tutorial: "Here's how streaks work" (skippable)

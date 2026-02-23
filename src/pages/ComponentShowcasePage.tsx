@@ -110,7 +110,7 @@ const ComponentShowcasePage = () => {
         <section className="grid gap-4 md:grid-cols-2">
           <Card variant="elevated" className="space-y-4">
             <h2 className="text-lg font-semibold">Quiz components</h2>
-            <QuizProgress current={2} total={7} />
+            <QuizProgress current={2} total={10} />
             <QuizQuestion
               question={firstQuestion}
               selectedOptionId={quizSelection}

@@ -30,7 +30,7 @@
 ### MVP Features
 
 - Landing page with value proposition
-- 7-question motivation quiz
+- 10-question motivation quiz
 - Persona showcase with examples
 - Interactive demo (streak tracker, step entry, notification generator)
 - Waitlist signup
@@ -62,4 +62,3 @@
 - Build landing page
 - Implement motivation quiz
 - Create interactive demo experience
-

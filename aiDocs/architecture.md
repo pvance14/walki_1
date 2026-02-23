@@ -435,7 +435,7 @@ interface Persona {
 │   │       └── WaitlistForm.tsx
 │   │
 │   ├── data/
-│   │   ├── quizQuestions.ts      # 7 questions with scoring
+│   │   ├── quizQuestions.ts      # 10 questions with scoring
 │   │   ├── personas.ts           # 6 persona definitions
 │   │   ├── notificationLibrary.ts # 300+ message templates
 │   │   └── demoData.ts           # Sample streak/calendar data
@@ -494,7 +494,7 @@ interface Persona {
    └─> QuizQuestion component shows Q1
    └─> User selects answer
    └─> State updated: answers[0] = 2
-   └─> Repeat for 7 questions
+   └─> Repeat for 10 questions
    └─> useQuizScoring hook calculates results
        └─> personaScoring.ts: calculateQuizResults()
        └─> Results saved to LocalStorage
@@ -810,7 +810,7 @@ Scale (thousands of users)
 #### Phase 4: Motivation Quiz (Days 5-6)
 
 - Quiz introduction screen
-- Question flow with progress indicator (1 of 7)
+- Question flow with progress indicator (1 of 10)
 - Answer selection with hover states
 - Back button to revise answers
 - Quiz completion and scoring
@@ -1154,5 +1154,4 @@ Static web demo, no backend
 | ------- | ------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1.0     | Feb 17, 2026 | Preston Vance | Initial architecture documentation                                                                                                                                                                                                                                                                        |
 | 1.1     | Feb 18, 2026 | Preston Vance | Updated with detailed implementation decisions from 10-phase roadmap: confirmed tech stack (Shadcn/ui, Recharts, Zustand, Vitest), added implementation timeline, success metrics configuration, development workflow, testing strategy, mobile-first checkpoints, and deployment verification procedures |
-
 
