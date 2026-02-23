@@ -9,6 +9,7 @@ import { DayDetailModal } from '@/components/demo/DayDetailModal';
 import { PersonasTab } from '@/components/demo/PersonasTab';
 import { SettingsTab } from '@/components/demo/SettingsTab';
 import { NOTIFICATION_LIBRARY } from '@/data/notificationLibrary';
+import { QUIZ_QUESTIONS } from '@/data/quizQuestions';
 import { createNotificationContext, getTimeOfDay, selectNotification } from '@/utils/messageSelector';
 import { injectContext } from '@/utils/contextInjection';
 import { useDemoStore } from '@/store/demoStore';
@@ -75,12 +76,18 @@ export const DemoHome = () => {
   const dismissMilestone = useDemoStore((state) => state.dismissMilestone);
   const setActiveTab = useDemoStore((state) => state.setActiveTab);
   const setPersonaWeight = useDemoStore((state) => state.setPersonaWeight);
+  const resetPersonaWeights = useDemoStore((state) => state.resetPersonaWeights);
   const hydratePersonaWeights = useDemoStore((state) => state.hydratePersonaWeights);
   const updateSettings = useDemoStore((state) => state.updateSettings);
   const setDailyGoal = useDemoStore((state) => state.setDailyGoal);
   const resetDemo = useDemoStore((state) => state.resetDemo);
 
+  const hydrateQuiz = useQuizStore((state) => state.hydrate);
   const quizResults = useQuizStore((state) => state.results);
+
+  useEffect(() => {
+    hydrateQuiz(QUIZ_QUESTIONS.length);
+  }, [hydrateQuiz]);
 
   useEffect(() => {
     if (quizResults) {
@@ -120,7 +127,18 @@ export const DemoHome = () => {
     }
 
     if (activeTab === 'personas') {
-      return <PersonasTab personaWeights={personaWeights} onSetPersonaWeight={setPersonaWeight} />;
+      return (
+        <PersonasTab
+          personaWeights={personaWeights}
+          onSetPersonaWeight={setPersonaWeight}
+          onResetToQuiz={() => {
+            if (quizResults) {
+              resetPersonaWeights(quizResults.percentages);
+            }
+          }}
+          canResetToQuiz={Boolean(quizResults)}
+        />
+      );
     }
 
     if (activeTab === 'settings') {

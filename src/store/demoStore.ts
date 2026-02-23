@@ -49,6 +49,7 @@ type DemoStore = {
   dismissMilestone: () => void;
   setActiveTab: (tab: DemoTab) => void;
   setPersonaWeight: (personaId: PersonaId, value: number) => void;
+  resetPersonaWeights: (weights: PersonaPercentages) => void;
   hydratePersonaWeights: (weights: PersonaPercentages) => void;
   updateSettings: (updates: Partial<Settings>) => void;
   setDailyGoal: (dailyGoal: number) => void;
@@ -490,6 +491,18 @@ export const useDemoStore = create<DemoStore>((set) => ({
         ...state,
         personaWeights: nextWeights,
         personaWeightsCustomized: true,
+      };
+      persistState(next);
+      return next;
+    });
+  },
+
+  resetPersonaWeights: (weights) => {
+    set((state) => {
+      const next = {
+        ...state,
+        personaWeights: sanitizePersonaWeights(weights, state.personaWeights),
+        personaWeightsCustomized: false,
       };
       persistState(next);
       return next;
