@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { INITIAL_DEMO_STATE } from '@/data/demoData';
+import { PERSONA_HEX } from '@/lib/persona';
 import type { DayData, DemoTab, Notification, PersonaId, PersonaPercentages, Settings } from '@/types';
 
 export const DEMO_STORAGE_KEY = 'walki_demo_state';
@@ -28,6 +29,8 @@ type PersistedDemoState = {
   activeTab?: DemoTab;
   recentTemplateIds?: string[];
   personaWeightsCustomized?: boolean;
+  recentPersonaId?: PersonaId | null;
+  recentPersonaColor?: string | null;
 };
 
 type DemoStore = {
@@ -42,6 +45,8 @@ type DemoStore = {
   queuedMilestones: MilestoneEvent[];
   personaWeights: PersonaPercentages;
   personaWeightsCustomized: boolean;
+  recentPersonaId: PersonaId | null;
+  recentPersonaColor: string | null;
   settings: Settings;
   activeTab: DemoTab;
   addSteps: (amount: number) => void;
@@ -277,6 +282,8 @@ const persistState = (state: DemoStore) => {
     activeTab: state.activeTab,
     recentTemplateIds: state.recentTemplateIds,
     personaWeightsCustomized: state.personaWeightsCustomized,
+    recentPersonaId: state.recentPersonaId,
+    recentPersonaColor: state.recentPersonaColor,
   };
 
   window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(payload));
@@ -298,6 +305,8 @@ const getBaseState = () => {
     seenMilestones: [] as string[],
     personaWeights: sanitizePersonaWeights(INITIAL_DEMO_STATE.personaWeights, INITIAL_DEMO_STATE.personaWeights),
     personaWeightsCustomized: false,
+    recentPersonaId: null as PersonaId | null,
+    recentPersonaColor: null as string | null,
     settings: {
       ...baseSettings,
       dailyGoal: baseGoal,
@@ -343,6 +352,16 @@ const hydrateInitial = () => {
       : base.recentTemplateIds;
 
     const personaWeights = sanitizePersonaWeights(parsed.personaWeights, base.personaWeights);
+    const recentPersonaId =
+      typeof parsed.recentPersonaId === 'string' && PERSONA_IDS.includes(parsed.recentPersonaId as PersonaId)
+        ? (parsed.recentPersonaId as PersonaId)
+        : null;
+    const recentPersonaColor =
+      typeof parsed.recentPersonaColor === 'string' && parsed.recentPersonaColor.trim().length > 0
+        ? parsed.recentPersonaColor
+        : recentPersonaId
+          ? PERSONA_HEX[recentPersonaId]
+          : null;
 
     return {
       currentSteps,
@@ -354,6 +373,8 @@ const hydrateInitial = () => {
       recentTemplateIds,
       personaWeights,
       personaWeightsCustomized: Boolean(parsed.personaWeightsCustomized),
+      recentPersonaId,
+      recentPersonaColor,
       settings: {
         ...settings,
         dailyGoal,
@@ -379,6 +400,8 @@ export const useDemoStore = create<DemoStore>((set) => ({
   queuedMilestones: [],
   personaWeights: initial.personaWeights,
   personaWeightsCustomized: initial.personaWeightsCustomized,
+  recentPersonaId: initial.recentPersonaId,
+  recentPersonaColor: initial.recentPersonaColor,
   settings: initial.settings,
   activeTab: initial.activeTab,
 
@@ -454,6 +477,8 @@ export const useDemoStore = create<DemoStore>((set) => ({
         ...state,
         notifications: nextNotifications,
         recentTemplateIds: nextRecentTemplateIds,
+        recentPersonaId: notification.personaId,
+        recentPersonaColor: PERSONA_HEX[notification.personaId],
       };
       persistState(next);
       return next;
@@ -590,6 +615,8 @@ export const useDemoStore = create<DemoStore>((set) => ({
         queuedMilestones: [],
         personaWeights: base.personaWeights,
         personaWeightsCustomized: false,
+        recentPersonaId: null,
+        recentPersonaColor: null,
         settings: base.settings,
         activeTab: 'home' as DemoTab,
       };

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
@@ -14,12 +14,14 @@ import {
 import { Navigation } from '@/components/layout/Navigation';
 import { Button, Card, Modal, NotificationCard, PersonaCard } from '@/components/ui';
 import { PERSONAS } from '@/data/personas';
+import { PERSONA_ICON } from '@/lib/persona';
 import { QUIZ_QUESTIONS } from '@/data/quizQuestions';
 import { useQuizStore } from '@/store/quizStore';
 import type { Notification } from '@/types';
 
 const QUIZ_QUESTION_COUNT = QUIZ_QUESTIONS.length;
 const SHARE_TRACKING_KEY = 'walki_share_events_count';
+const ANALYSIS_DURATION_MS = 2400;
 
 type ShareStatus = 'idle' | 'shared' | 'copied' | 'copy-failed';
 
@@ -112,6 +114,9 @@ const QuizResultsPage = () => {
 
   const [isRetakeModalOpen, setIsRetakeModalOpen] = useState(false);
   const [shareStatus, setShareStatus] = useState<ShareStatus>('idle');
+  const [revealRun, setRevealRun] = useState(0);
+  const [revealPhase, setRevealPhase] = useState<'analyzing' | 'revealed'>(reduceMotion ? 'revealed' : 'analyzing');
+  const [activePersonaId, setActivePersonaId] = useState<(typeof PERSONAS)[number]['id']>('sunny');
 
   const personaRows = useMemo<PersonaRow[]>(() => {
     if (!results) {
@@ -125,7 +130,7 @@ const QuizResultsPage = () => {
     })).sort((a, b) => b.score - a.score);
   }, [results]);
 
-  const topPersona = personaRows[0];
+  const topPersona = personaRows[0] ?? PERSONAS[0];
 
   const sampleNotifications = useMemo(() => {
     if (!results) {
@@ -154,6 +159,56 @@ const QuizResultsPage = () => {
       }),
     }));
   }, [personaRows, results]);
+
+  useEffect(() => {
+    if (!results || personaRows.length < 3) {
+      return;
+    }
+
+    if (reduceMotion) {
+      setRevealPhase('revealed');
+      setActivePersonaId(topPersona.id);
+      return;
+    }
+
+    setRevealPhase('analyzing');
+
+    const sequence = [
+      ...personaRows.map((persona) => persona.id),
+      ...personaRows.map((persona) => persona.id),
+      ...personaRows.map((persona) => persona.id),
+      personaRows[0].id,
+      personaRows[1].id,
+      personaRows[2].id,
+      topPersona.id,
+    ];
+    const delays = [110, 110, 120, 120, 140, 160, 180, 220, 260, 320, 420];
+    const timers: number[] = [];
+    let elapsed = 0;
+
+    sequence.forEach((personaId, index) => {
+      const delay = delays[Math.min(index, delays.length - 1)];
+      elapsed += delay;
+      timers.push(
+        window.setTimeout(() => {
+          setActivePersonaId(personaId);
+        }, elapsed),
+      );
+    });
+
+    const revealTimer = window.setTimeout(
+      () => {
+        setActivePersonaId(topPersona.id);
+        setRevealPhase('revealed');
+      },
+      Math.max(ANALYSIS_DURATION_MS, elapsed),
+    );
+    timers.push(revealTimer);
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [personaRows, reduceMotion, results, revealRun, topPersona.id]);
 
   if (!results) {
     return <Navigate to="/quiz" replace />;
@@ -210,10 +265,50 @@ const QuizResultsPage = () => {
     navigate('/quiz');
   };
 
+  const analyzingPersona = personaRows.find((persona) => persona.id === activePersonaId) ?? topPersona;
+  const topThreePersonas = personaRows.slice(0, 3);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navigation />
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:py-10">
+        {revealPhase === 'analyzing' ? (
+          <Card variant="elevated" className="space-y-6">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Analyzing Results</p>
+              <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Analyzing your motivation style...</h1>
+              <p className="text-sm text-slate-700">
+                Comparing all six persona voices to find your strongest motivation match.
+              </p>
+            </div>
+
+            <motion.div
+              key={analyzingPersona.id}
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+              className="mx-auto flex max-w-sm items-center gap-4 rounded-xl border border-slate-200 bg-white p-4"
+            >
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-full border text-2xl"
+                style={{ borderColor: analyzingPersona.color, backgroundColor: `${analyzingPersona.color}22` }}
+              >
+                {PERSONA_ICON[analyzingPersona.id]}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{analyzingPersona.name}</p>
+                <p className="text-xs text-slate-600">{analyzingPersona.title}</p>
+              </div>
+            </motion.div>
+
+            <Button type="button" variant="outline" onClick={() => setRevealPhase('revealed')}>
+              Skip Reveal
+            </Button>
+          </Card>
+        ) : null}
+
+        {revealPhase === 'revealed' ? (
+          <>
         <motion.section
           {...revealMotion}
           transition={{ duration: reduceMotion ? 0 : 0.28, ease: 'easeOut' }}
@@ -234,8 +329,33 @@ const QuizResultsPage = () => {
               <p className="text-sm font-semibold text-slate-900">Voice style</p>
               <p className="text-sm text-slate-700">{topPersona.voice}</p>
             </div>
+            {!reduceMotion ? (
+              <Button type="button" variant="outline" onClick={() => setRevealRun((value) => value + 1)}>
+                Replay Persona Reveal
+              </Button>
+            ) : null}
           </Card>
         </motion.section>
+
+        <section className="space-y-3">
+          <h2 className="text-xl font-semibold text-slate-900">Top 3 Persona Matches</h2>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            {topThreePersonas.map((persona, index) => (
+              <motion.div
+                key={persona.id}
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.92, y: 14 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 260, damping: 18, delay: 0.2 + index * 0.2 }
+                }
+              >
+                <PersonaCard persona={persona} onClick={() => navigate('/demo')} />
+              </motion.div>
+            ))}
+          </div>
+        </section>
 
         <motion.section
           {...revealMotion}
@@ -368,6 +488,8 @@ const QuizResultsPage = () => {
             </p>
           </Card>
         </motion.section>
+          </>
+        ) : null}
       </main>
 
       <Modal
