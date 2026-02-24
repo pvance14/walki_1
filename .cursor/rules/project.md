@@ -40,6 +40,11 @@ Each has distinct voice - see context.md:
 ### Tech Stack
 React + TypeScript + Vite + TailwindCSS (see architecture.md for full details)
 
+### Context7 MCP
+- Use Context7 MCP automatically when needing library/API documentation, code generation, or setup/configuration steps
+- No need to explicitly ask - Context7 provides up-to-date docs from source repositories
+- When working with specific libraries (React, TypeScript, Vite, TailwindCSS, etc.), Context7 will fetch current documentation
+
 ---
 
 **Remember:** This is a 2-week MVP to validate the AI persona concept. Ship fast, learn, iterate.
