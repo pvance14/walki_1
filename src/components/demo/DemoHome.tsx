@@ -17,6 +17,7 @@ import { createNotificationContext, getTimeOfDay, selectNotification } from '@/u
 import { injectContext } from '@/utils/contextInjection';
 import { useDemoStore } from '@/store/demoStore';
 import { useQuizStore } from '@/store/quizStore';
+import { logger } from '@/lib/logger';
 import type { DayData, NotificationContext, PersonaId, Settings } from '@/types';
 
 const getPreferredTimeOfDay = (settings: Settings): NotificationContext['timeOfDay'] => {
@@ -58,6 +59,8 @@ const getFreezeSummary = (calendarData: DayData[]) => {
     mostRecentDaysAgo: daysAgo,
   };
 };
+
+const demoHomeLogger = logger.child({ scope: 'demo-home' });
 
 export const DemoHome = () => {
   const reduceMotion = useReducedMotion();
@@ -105,6 +108,9 @@ export const DemoHome = () => {
   useEffect(() => {
     if (quizResults) {
       hydratePersonaWeights(quizResults.percentages);
+      demoHomeLogger.info('persona_weights_hydrated_from_quiz', {
+        topPersonaId: quizResults.topPersona,
+      });
     }
   }, [hydratePersonaWeights, quizResults]);
 
@@ -130,6 +136,7 @@ export const DemoHome = () => {
 
   const handleGenerateMotivation = () => {
     if (isGeneratingMotivation) {
+      demoHomeLogger.debug('generate_motivation_ignored_in_progress');
       return;
     }
 
@@ -137,6 +144,14 @@ export const DemoHome = () => {
     const template = selectNotification(NOTIFICATION_LIBRARY, context, personaWeights, recentTemplateIds);
     const message = injectContext(template.template, context);
     const notificationId = `demo-notification-${Date.now()}`;
+    demoHomeLogger.info('generate_motivation_started', {
+      currentSteps,
+      dailyGoal,
+      streak,
+      timeOfDay: context.timeOfDay,
+      templateId: template.id,
+      personaId: template.personaId,
+    });
 
     setIsGeneratingMotivation(true);
     setTypingPersonaId(template.personaId);
@@ -152,6 +167,11 @@ export const DemoHome = () => {
         },
         template.id,
       );
+      demoHomeLogger.info('generate_motivation_completed', {
+        notificationId,
+        templateId: template.id,
+        personaId: template.personaId,
+      });
       setHighlightedNotificationId(notificationId);
       setTypingPersonaId(null);
       setIsGeneratingMotivation(false);
@@ -168,6 +188,12 @@ export const DemoHome = () => {
   const handleStepSubmit = (steps: number) => {
     const crossesGoal = currentSteps < dailyGoal && currentSteps + steps >= dailyGoal;
     addSteps(steps);
+    demoHomeLogger.info('step_entry_submitted', {
+      steps,
+      currentStepsBefore: currentSteps,
+      dailyGoal,
+      crossesGoal,
+    });
 
     if (!crossesGoal || reduceMotion) {
       return;

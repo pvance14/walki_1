@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { INITIAL_DEMO_STATE } from '@/data/demoData';
 import { PERSONA_HEX } from '@/lib/persona';
+import { logger } from '@/lib/logger';
 import type { DayData, DemoTab, Notification, PersonaId, PersonaPercentages, Settings } from '@/types';
 
 export const DEMO_STORAGE_KEY = 'walki_demo_state';
+const demoLogger = logger.child({ scope: 'demo-store' });
 
 const STREAK_MILESTONES = new Set([7, 14, 21]);
 const DEMO_TABS: DemoTab[] = ['home', 'calendar', 'personas', 'settings'];
@@ -287,6 +289,13 @@ const persistState = (state: DemoStore) => {
   };
 
   window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(payload));
+  demoLogger.debug('demo_state_saved', {
+    currentSteps: state.currentSteps,
+    streak: state.streak,
+    dailyGoal: state.dailyGoal,
+    notificationsCount: state.notifications.length,
+    activeTab: state.activeTab,
+  });
 };
 
 const getBaseState = () => {
@@ -325,6 +334,7 @@ const hydrateInitial = () => {
   try {
     const raw = window.localStorage.getItem(DEMO_STORAGE_KEY);
     if (!raw) {
+      demoLogger.info('demo_hydrate_empty');
       return base;
     }
 
@@ -363,7 +373,7 @@ const hydrateInitial = () => {
           ? PERSONA_HEX[recentPersonaId]
           : null;
 
-    return {
+    const hydrated = {
       currentSteps,
       dailyGoal,
       streak: calculateCurrentStreak(calendarData),
@@ -381,7 +391,16 @@ const hydrateInitial = () => {
       },
       activeTab: getSafeActiveTab(parsed.activeTab),
     };
-  } catch {
+    demoLogger.info('demo_hydrate_restored', {
+      currentSteps: hydrated.currentSteps,
+      streak: hydrated.streak,
+      dailyGoal: hydrated.dailyGoal,
+      notificationsCount: hydrated.notifications.length,
+      activeTab: hydrated.activeTab,
+    });
+    return hydrated;
+  } catch (error) {
+    demoLogger.warn('demo_hydrate_failed', { error });
     return base;
   }
 };
@@ -408,6 +427,7 @@ export const useDemoStore = create<DemoStore>((set) => ({
   addSteps: (amount) => {
     const sanitizedAmount = Number.isFinite(amount) ? Math.floor(amount) : 0;
     if (sanitizedAmount <= 0) {
+      demoLogger.warn('add_steps_ignored_invalid', { amount });
       return;
     }
 
@@ -463,6 +483,13 @@ export const useDemoStore = create<DemoStore>((set) => ({
       };
 
       persistState(next);
+      demoLogger.info('steps_added', {
+        addedSteps: sanitizedAmount,
+        currentSteps: next.currentSteps,
+        streak: next.streak,
+        dailyGoal: next.dailyGoal,
+        milestonesQueued: milestonesToAdd.map((milestone) => milestone.id),
+      });
       return next;
     });
   },
@@ -481,6 +508,12 @@ export const useDemoStore = create<DemoStore>((set) => ({
         recentPersonaColor: PERSONA_HEX[notification.personaId],
       };
       persistState(next);
+      demoLogger.info('notification_added', {
+        notificationId: notification.id,
+        personaId: notification.personaId,
+        templateId: templateId ?? null,
+        notificationsCount: next.notifications.length,
+      });
       return next;
     });
   },
@@ -494,6 +527,10 @@ export const useDemoStore = create<DemoStore>((set) => ({
         queuedMilestones: rest,
       };
       persistState(next);
+      demoLogger.debug('milestone_dismissed', {
+        nextMilestoneId: next.activeMilestone?.id ?? null,
+        queueLength: next.queuedMilestones.length,
+      });
       return next;
     });
   },
@@ -505,6 +542,7 @@ export const useDemoStore = create<DemoStore>((set) => ({
         activeTab: getSafeActiveTab(tab),
       };
       persistState(next);
+      demoLogger.debug('active_tab_set', { activeTab: next.activeTab });
       return next;
     });
   },
@@ -518,6 +556,11 @@ export const useDemoStore = create<DemoStore>((set) => ({
         personaWeightsCustomized: true,
       };
       persistState(next);
+      demoLogger.info('persona_weight_set', {
+        personaId,
+        value,
+        normalizedWeights: nextWeights,
+      });
       return next;
     });
   },
@@ -530,6 +573,7 @@ export const useDemoStore = create<DemoStore>((set) => ({
         personaWeightsCustomized: false,
       };
       persistState(next);
+      demoLogger.info('persona_weights_reset_to_quiz', { personaWeights: next.personaWeights });
       return next;
     });
   },
@@ -545,6 +589,7 @@ export const useDemoStore = create<DemoStore>((set) => ({
         personaWeights: sanitizePersonaWeights(weights, state.personaWeights),
       };
       persistState(next);
+      demoLogger.debug('persona_weights_hydrated', { personaWeights: next.personaWeights });
       return next;
     });
   },
@@ -569,6 +614,10 @@ export const useDemoStore = create<DemoStore>((set) => ({
         settings: nextSettings,
       };
       persistState(next);
+      demoLogger.info('settings_updated', {
+        updates,
+        settings: next.settings,
+      });
       return next;
     });
   },
@@ -590,6 +639,11 @@ export const useDemoStore = create<DemoStore>((set) => ({
       };
 
       persistState(next);
+      demoLogger.info('daily_goal_set', {
+        previousGoal: state.dailyGoal,
+        nextGoal,
+        streak: next.streak,
+      });
       return next;
     });
   },
@@ -622,6 +676,7 @@ export const useDemoStore = create<DemoStore>((set) => ({
       };
 
       persistState(next);
+      demoLogger.warn('demo_reset');
       return next;
     });
   },

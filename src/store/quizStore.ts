@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import type { QuizQuestion, QuizResults } from '@/types';
 import { calculateQuizResults } from '@/utils/personaScoring';
+import { logger } from '@/lib/logger';
 
 export const QUIZ_STORAGE_KEY = 'walki_quiz_progress';
+const quizLogger = logger.child({ scope: 'quiz-store' });
 
 type PersistedQuizState = {
   currentQuestionIndex: number;
@@ -52,6 +54,11 @@ const saveState = (state: QuizStore) => {
   }
 
   window.localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(toPersisted(state)));
+  quizLogger.debug('quiz_state_saved', {
+    currentQuestionIndex: state.currentQuestionIndex,
+    isComplete: state.isComplete,
+    hasStarted: state.hasStarted,
+  });
 };
 
 const clearState = () => {
@@ -60,6 +67,7 @@ const clearState = () => {
   }
 
   window.localStorage.removeItem(QUIZ_STORAGE_KEY);
+  quizLogger.info('quiz_state_cleared');
 };
 
 const parseStoredState = (totalQuestions: number): PersistedQuizState | null => {
@@ -90,7 +98,8 @@ const parseStoredState = (totalQuestions: number): PersistedQuizState | null => 
       isComplete: Boolean(parsed.isComplete),
       hasStarted: Boolean(parsed.hasStarted) || answers.some((answer) => Boolean(answer)) || Boolean(parsed.isComplete),
     };
-  } catch {
+  } catch (error) {
+    quizLogger.warn('quiz_state_parse_failed', { error });
     return null;
   }
 };
@@ -106,6 +115,7 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
   hydrate: (totalQuestions) => {
     const stored = parseStoredState(totalQuestions);
     if (!stored) {
+      quizLogger.info('quiz_hydrate_empty', { totalQuestions });
       set({
         currentQuestionIndex: 0,
         answers: getEmptyAnswers(totalQuestions),
@@ -117,6 +127,12 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
       return;
     }
 
+    quizLogger.info('quiz_hydrate_restored', {
+      totalQuestions,
+      currentQuestionIndex: stored.currentQuestionIndex,
+      answeredCount: stored.answers.filter(Boolean).length,
+      isComplete: stored.isComplete,
+    });
     set({
       currentQuestionIndex: stored.currentQuestionIndex,
       answers: stored.answers,
@@ -136,6 +152,10 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
     set((state) => {
       const next = { ...state, hasStarted: true };
       saveState(next);
+      quizLogger.info('quiz_started', {
+        currentQuestionIndex: next.currentQuestionIndex,
+        answeredCount: next.answers.filter(Boolean).length,
+      });
       return next;
     });
   },
@@ -146,6 +166,11 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
       nextAnswers[questionIndex] = answerId;
       const next = { ...state, answers: nextAnswers, hasStarted: true };
       saveState(next);
+      quizLogger.debug('quiz_answer_set', {
+        questionIndex,
+        answerId,
+        answeredCount: nextAnswers.filter(Boolean).length,
+      });
       return next;
     });
   },
@@ -157,6 +182,7 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
         currentQuestionIndex: Math.min(state.currentQuestionIndex + 1, totalQuestions - 1),
       };
       saveState(next);
+      quizLogger.debug('quiz_next_question', { currentQuestionIndex: next.currentQuestionIndex });
       return next;
     });
   },
@@ -165,6 +191,7 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
     set((state) => {
       const next = { ...state, currentQuestionIndex: Math.max(state.currentQuestionIndex - 1, 0) };
       saveState(next);
+      quizLogger.debug('quiz_previous_question', { currentQuestionIndex: next.currentQuestionIndex });
       return next;
     });
   },
@@ -173,6 +200,10 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
     const state = get();
     const selectedAnswers = state.answers.filter((answer): answer is string => Boolean(answer));
     if (selectedAnswers.length !== questions.length) {
+      quizLogger.warn('quiz_complete_blocked_incomplete_answers', {
+        selectedAnswers: selectedAnswers.length,
+        totalQuestions: questions.length,
+      });
       return null;
     }
 
@@ -188,6 +219,10 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
         results,
       };
       saveState(next);
+      quizLogger.info('quiz_completed', {
+        topPersonaId: results.topPersona,
+        totalQuestions: questions.length,
+      });
       return next;
     });
 
@@ -196,6 +231,7 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
 
   resetQuiz: (totalQuestions) => {
     clearState();
+    quizLogger.info('quiz_reset', { totalQuestions });
     set({
       currentQuestionIndex: 0,
       answers: getEmptyAnswers(totalQuestions),

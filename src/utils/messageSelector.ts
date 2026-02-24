@@ -1,4 +1,7 @@
 import type { NotificationTemplate, NotificationContext, PersonaPercentages } from '@/types';
+import { logger } from '@/lib/logger';
+
+const messageSelectorLogger = logger.child({ scope: 'message-selector' });
 
 /**
  * Select a notification based on context, persona weights, and exclusion list
@@ -24,12 +27,32 @@ export function selectNotification(
 
   // If no messages left after filtering, use all context-filtered messages
   const candidateMessages = availableMessages.length > 0 ? availableMessages : contextFiltered;
+  if (availableMessages.length === 0 && contextFiltered.length > 0) {
+    messageSelectorLogger.debug('recent_templates_exhausted_context_matches', {
+      contextFilteredCount: contextFiltered.length,
+      recentMessageCount: recentMessageIds.length,
+    });
+  }
 
   // Step 3: Apply weighted selection based on persona preferences
   const selectedMessage = weightedRandomSelection(candidateMessages, personaWeights);
 
   // Fallback to first message if selection fails
-  return selectedMessage || candidateMessages[0] || library[0];
+  const fallback = selectedMessage || candidateMessages[0] || library[0];
+  if (!selectedMessage) {
+    messageSelectorLogger.warn('weighted_selection_fallback_used', {
+      libraryCount: library.length,
+      candidateCount: candidateMessages.length,
+      fallbackTemplateId: fallback?.id ?? null,
+    });
+  }
+
+  messageSelectorLogger.info('notification_template_selected', {
+    templateId: fallback.id,
+    personaId: fallback.personaId,
+    candidateCount: candidateMessages.length,
+  });
+  return fallback;
 }
 
 /**
@@ -73,6 +96,12 @@ function filterByContext(
   );
 
   // If no matches, return all templates (fallback)
+  if (filtered.length === 0) {
+    messageSelectorLogger.warn('context_filter_no_matches', {
+      libraryCount: library.length,
+      contextTags,
+    });
+  }
   return filtered.length > 0 ? filtered : library;
 }
 

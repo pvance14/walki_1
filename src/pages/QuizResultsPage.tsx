@@ -17,11 +17,13 @@ import { PERSONAS } from '@/data/personas';
 import { PERSONA_ICON } from '@/lib/persona';
 import { QUIZ_QUESTIONS } from '@/data/quizQuestions';
 import { useQuizStore } from '@/store/quizStore';
+import { logger } from '@/lib/logger';
 import type { Notification } from '@/types';
 
 const QUIZ_QUESTION_COUNT = QUIZ_QUESTIONS.length;
 const SHARE_TRACKING_KEY = 'walki_share_events_count';
 const ANALYSIS_DURATION_MS = 2400;
+const quizResultsLogger = logger.child({ scope: 'quiz-results-page' });
 
 type ShareStatus = 'idle' | 'shared' | 'copied' | 'copy-failed';
 
@@ -233,6 +235,7 @@ const QuizResultsPage = () => {
       if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share(sharePayload);
         trackShare('web-share');
+        quizResultsLogger.info('quiz_results_shared', { method: 'web-share' });
         setShareStatus('shared');
         return;
       }
@@ -240,20 +243,25 @@ const QuizResultsPage = () => {
       const copied = await copyText(shareText);
       if (copied) {
         trackShare('clipboard');
+        quizResultsLogger.info('quiz_results_shared', { method: 'clipboard' });
         setShareStatus('copied');
       } else {
+        quizResultsLogger.warn('quiz_results_share_failed', { method: 'clipboard' });
         setShareStatus('copy-failed');
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
+        quizResultsLogger.info('quiz_results_share_aborted');
         return;
       }
 
       const copied = await copyText(shareText);
       if (copied) {
         trackShare('clipboard');
+        quizResultsLogger.warn('quiz_results_shared_after_error', { method: 'clipboard', error });
         setShareStatus('copied');
       } else {
+        quizResultsLogger.error('quiz_results_share_failed_after_error', { error });
         setShareStatus('copy-failed');
       }
     }
@@ -262,6 +270,7 @@ const QuizResultsPage = () => {
   const handleRetakeConfirm = () => {
     setIsRetakeModalOpen(false);
     resetQuiz(QUIZ_QUESTION_COUNT);
+    quizResultsLogger.info('quiz_retake_confirmed');
     navigate('/quiz');
   };
 
